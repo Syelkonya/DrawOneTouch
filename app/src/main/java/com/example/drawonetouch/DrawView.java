@@ -51,12 +51,12 @@ public class DrawView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(mBackgroundPaint);
 
-        if (buttonCurveWasTouched) {
+//        if (buttonCurveWasTouched) {
             mPaint.setColor(mCurrentColor);
             canvas.drawPath(mPath, mPaint);
 
-        }
-        else if (buttonRectangleWasTouched){
+//        }
+//        else if (buttonRectangleWasTouched){
             mPaint.setColor(mCurrentColor);
             for (Box box : mBoxes) {
                 float left = Math.min(box.getOrigin().x, box.getCurrent().x);
@@ -65,13 +65,13 @@ public class DrawView extends View {
                 float bottom = Math.max(box.getOrigin().y, box.getCurrent().y);
                 canvas.drawRect(left, top, right, bottom, mPaint);
             }
-        }else if (buttonStraightWasTouched){
+//        }else if (buttonStraightWasTouched){
             mPaint.setColor(mCurrentColor);
             for (Box box : mLines){
                 canvas.drawLine(box.getOrigin().x, box.getOrigin().y,
                         box.getCurrent().x, box.getCurrent().y, mPaint);
             }
-        }
+//        }
 
     }
 
@@ -85,6 +85,7 @@ public class DrawView extends View {
             switch (event.getAction()) {
                 case ACTION_DOWN:
                     mPath.moveTo(eventX, eventY);
+                    mAllTypes.add(mPath);
                     return true;
                 case ACTION_MOVE:
                     mPath.lineTo(eventX, eventY);
@@ -103,6 +104,7 @@ public class DrawView extends View {
                 case MotionEvent.ACTION_DOWN:
                     mCurrentBox = new Box(current);
                     mBoxes.add(mCurrentBox);
+                    mAllTypes.add(mCurrentBox);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (mCurrentBox != null) {
@@ -124,6 +126,7 @@ public class DrawView extends View {
                 case MotionEvent.ACTION_DOWN:
                 mCurrentLine = new Box(current);
                 mLines.add(mCurrentLine);
+                mAllTypes.add(mCurrentBox);
                 break;
                 case MotionEvent.ACTION_MOVE:
                     if (mCurrentLine != null){
