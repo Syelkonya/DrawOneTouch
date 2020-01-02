@@ -6,10 +6,12 @@ public class Box {
 
     private PointF mOrigin;
     private PointF mCurrent;
+    private int mColor;
 
-    public Box(PointF origin) {
+    public Box(PointF origin, int color) {
         mOrigin = origin;
         mCurrent = origin;
+        mColor = color;
     }
 
     public PointF getCurrent() {
@@ -23,4 +25,11 @@ public class Box {
     public PointF getOrigin() {
         return mOrigin;
     }
+
+
+    public int getColor() {
+        return mColor;
+    }
+
+
 }

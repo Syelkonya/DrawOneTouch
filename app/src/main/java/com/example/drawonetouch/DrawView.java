@@ -26,7 +26,7 @@ public class DrawView extends View {
     private int mCurrentColor = Color.RED;
 
     private Paint mPaint = new Paint();
-    private Path mPath = new Path();
+    private PathWithColor mPath = new PathWithColor(mCurrentColor);
     private Paint mBackgroundPaint = new Paint();
 
 
@@ -39,7 +39,9 @@ public class DrawView extends View {
 
     private Box mCurrentLine;
     private List<Box> mLines = new ArrayList<>();
-    private List<Object> mAllTypes = new ArrayList<>();
+
+
+    private List<PathWithColor> mCurves = new ArrayList<>();
 
 
     public DrawView(Context context, @Nullable AttributeSet attrs) {
@@ -51,28 +53,27 @@ public class DrawView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(mBackgroundPaint);
 
-//        if (buttonCurveWasTouched) {
-            mPaint.setColor(mCurrentColor);
-            canvas.drawPath(mPath, mPaint);
 
-//        }
-//        else if (buttonRectangleWasTouched){
-            mPaint.setColor(mCurrentColor);
+            for (PathWithColor path: mCurves){
+                mPaint.setColor(path.getColor());
+                canvas.drawPath(path, mPaint);
+            }
+
+
             for (Box box : mBoxes) {
                 float left = Math.min(box.getOrigin().x, box.getCurrent().x);
                 float right = Math.max(box.getOrigin().x, box.getCurrent().x);
                 float top = Math.min(box.getOrigin().y, box.getCurrent().y);
                 float bottom = Math.max(box.getOrigin().y, box.getCurrent().y);
+                mPaint.setColor(box.getColor());
                 canvas.drawRect(left, top, right, bottom, mPaint);
             }
-//        }else if (buttonStraightWasTouched){
-            mPaint.setColor(mCurrentColor);
+
             for (Box box : mLines){
+                mPaint.setColor(box.getColor());
                 canvas.drawLine(box.getOrigin().x, box.getOrigin().y,
                         box.getCurrent().x, box.getCurrent().y, mPaint);
             }
-//        }
-
     }
 
     @Override
@@ -84,8 +85,9 @@ public class DrawView extends View {
 
             switch (event.getAction()) {
                 case ACTION_DOWN:
+                    mPath = new PathWithColor(mCurrentColor);
+                    mCurves.add(mPath);
                     mPath.moveTo(eventX, eventY);
-                    mAllTypes.add(mPath);
                     return true;
                 case ACTION_MOVE:
                     mPath.lineTo(eventX, eventY);
@@ -93,18 +95,17 @@ public class DrawView extends View {
                 default:
                     return false;
             }
-
             invalidate();
             return true;
-        }else if (buttonRectangleWasTouched) {
-            PointF current = new PointF(event.getX(), event.getY());
+        }
 
+        else if (buttonRectangleWasTouched) {
+            PointF current = new PointF(event.getX(), event.getY());
             int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
-                    mCurrentBox = new Box(current);
+                    mCurrentBox = new Box(current, mCurrentColor);
                     mBoxes.add(mCurrentBox);
-                    mAllTypes.add(mCurrentBox);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (mCurrentBox != null) {
@@ -118,15 +119,16 @@ public class DrawView extends View {
                     break;
             }
             return true;
-        }else if(buttonStraightWasTouched) {
+        }
+
+        else if(buttonStraightWasTouched) {
             PointF current = new PointF(event.getX(), event.getY());
 
             int action = event.getAction();
             switch (action){
                 case MotionEvent.ACTION_DOWN:
-                mCurrentLine = new Box(current);
+                mCurrentLine = new Box(current, mCurrentColor);
                 mLines.add(mCurrentLine);
-                mAllTypes.add(mCurrentBox);
                 break;
                 case MotionEvent.ACTION_MOVE:
                     if (mCurrentLine != null){
@@ -141,12 +143,14 @@ public class DrawView extends View {
             }
             return true;
         }
+
+
         invalidate();
         return true;
     }
 
     public void reset() {
-        mPath.reset();
+        mCurves.clear();
         mBoxes.clear();
         mLines.clear();
         invalidate();
@@ -172,8 +176,6 @@ public class DrawView extends View {
             case ("blue") :
                 mCurrentColor = Color.BLUE;
                 break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + colorString);
         }
         setUpPaint();
     }
