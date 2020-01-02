@@ -23,11 +23,11 @@ public class DrawView extends View {
 
     private static final float STROKE_WIDTH = 10f;
 
+    private int mCurrentColor = Color.RED;
+
     private Paint mPaint = new Paint();
     private Path mPath = new Path();
     private Paint mBackgroundPaint = new Paint();
-    private Paint mBoxPaint = new Paint();
-    private Paint mLinePaint = new Paint();
 
 
     protected boolean buttonCurveWasTouched = true;
@@ -39,6 +39,7 @@ public class DrawView extends View {
 
     private Box mCurrentLine;
     private List<Box> mLines = new ArrayList<>();
+    private List<Object> mAllTypes = new ArrayList<>();
 
 
     public DrawView(Context context, @Nullable AttributeSet attrs) {
@@ -51,21 +52,24 @@ public class DrawView extends View {
         canvas.drawPaint(mBackgroundPaint);
 
         if (buttonCurveWasTouched) {
+            mPaint.setColor(mCurrentColor);
             canvas.drawPath(mPath, mPaint);
 
         }
         else if (buttonRectangleWasTouched){
+            mPaint.setColor(mCurrentColor);
             for (Box box : mBoxes) {
                 float left = Math.min(box.getOrigin().x, box.getCurrent().x);
                 float right = Math.max(box.getOrigin().x, box.getCurrent().x);
                 float top = Math.min(box.getOrigin().y, box.getCurrent().y);
                 float bottom = Math.max(box.getOrigin().y, box.getCurrent().y);
-                canvas.drawRect(left, top, right, bottom, mBoxPaint);
+                canvas.drawRect(left, top, right, bottom, mPaint);
             }
         }else if (buttonStraightWasTouched){
+            mPaint.setColor(mCurrentColor);
             for (Box box : mLines){
                 canvas.drawLine(box.getOrigin().x, box.getOrigin().y,
-                        box.getCurrent().x, box.getCurrent().y, mLinePaint);
+                        box.getCurrent().x, box.getCurrent().y, mPaint);
             }
         }
 
@@ -134,7 +138,7 @@ public class DrawView extends View {
             }
             return true;
         }
-
+        invalidate();
         return true;
     }
 
@@ -151,32 +155,23 @@ public class DrawView extends View {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mBackgroundPaint.setColor(Color.WHITE);
-        mPaint.setColor(Color.RED);
-        mBoxPaint.setColor(Color.RED);
-        mLinePaint.setColor(Color.RED);
-        mLinePaint.setStrokeWidth(8f);
+        mPaint.setColor(mCurrentColor);
     }
 
     protected void setColorForPainting(String colorString){
-
-        int color;
         switch (colorString){
             case ("red") :
-                color = Color.RED;
+                mCurrentColor = Color.RED;
                 break;
             case ("green") :
-                color = Color.GREEN;
+                mCurrentColor = Color.GREEN;
                 break;
             case ("blue") :
-                color = Color.BLUE;
+                mCurrentColor = Color.BLUE;
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + colorString);
         }
-
-
-        mPaint.setColor(color);
-        mBoxPaint.setColor(color);
-        mLinePaint.setColor(color);
+        setUpPaint();
     }
 }
